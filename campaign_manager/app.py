@@ -3,7 +3,6 @@ import sqlite3
 import redis
 import json
 from kafka import KafkaProducer
-import json
 
 producer = KafkaProducer(
     bootstrap_servers="kafka:9092",
@@ -39,8 +38,14 @@ def create_campaign():
         "bid": data["bid"]
     }
 
-    # enviar evento a Kafka
+    cursor.execute(
+        "INSERT OR REPLACE INTO campaigns (id, segment, bid) VALUES (?, ?, ?)",
+        (campaign["id"], campaign["segment"], campaign["bid"])
+    )
+    conn.commit()
+
     producer.send("campaigns", campaign)
+    producer.flush()
 
     return {"status": "event sent"}
 

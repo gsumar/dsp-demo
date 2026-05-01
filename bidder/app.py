@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
 import redis
 import json
-from kafka import KafkaConsumer
-import json
 import threading
+from kafka import KafkaConsumer
 
 campaign_cache = {}
 
@@ -11,6 +10,8 @@ def consume_campaigns():
     consumer = KafkaConsumer(
         "campaigns",
         bootstrap_servers="kafka:9092",
+        group_id="bidder-group",
+        auto_offset_reset="earliest",
         value_deserializer=lambda m: json.loads(m.decode("utf-8"))
     )
 
